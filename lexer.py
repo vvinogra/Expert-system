@@ -1,5 +1,6 @@
 import lexeme
 from lexer_exception import LexerException
+import networkx as nx
 
 
 class Lexer:
@@ -12,7 +13,10 @@ class Lexer:
         self._true_initial_facts = []
         self._queries = []
 
-        self._p
+        self._graph = nx.DiGraph()
+        # self._graph.add_node(1)
+        # self._graph.add_edge(1, 2)
+        # print(self._graph)
 
     def tokenize_file(self):
         with open(self._filename, "r") as file:
@@ -20,20 +24,19 @@ class Lexer:
                 # Removing comment
                 line = line.partition("#")[0]
 
-                split_line = line.split()
+                # split_line = line.split()
+                #
+                # if len(split_line) == 1:
+                #     first_elem = split_line[0]
+                #
+                #     if first_elem.startswith("="):
+                #         self._check_for_initial_facts(first_elem)
+                #     elif first_elem.startswith("?"):
+                #         self._check_for_queries(first_elem)
+                # elif len(split_line) > 1:
+                self._add_rule(line)
+                    # self._add_rule_to_graph(split_line)
 
-                if len(split_line) == 1:
-                    first_elem = split_line[0]
-
-                    if first_elem.startswith("="):
-                        self._check_for_initial_facts(first_elem)
-                    elif first_elem.startswith("?"):
-                        self._check_for_queries(first_elem)
-                elif len(split_line) > 1:
-                    for elem in split_line:
-                        for lexeme_type, type_value in lexeme.LEXEME_TYPES.items():
-                            if lexeme_type == "FACT":
-                                if elem in type_value:
 
 
 
@@ -50,8 +53,8 @@ class Lexer:
                 # print(split_line)
                 pass
 
-        print(self._queries)
-        print(self._true_initial_facts)
+        # print(self._queries)
+        # print(self._true_initial_facts)
 
     def _check_for_initial_facts(self, facts):
         if self._parsed_initial_facts:
@@ -80,4 +83,47 @@ class Lexer:
 
         self._parsed_queries = True
 
-    def _check_for_
+    def _add_rule_to_graph(self, split_line):
+        pass
+        # for elem in split_line:
+        #     if elem in lexeme.LEXEME_SEP_OPERATORS.value():
+        #         pass
+
+            # for lexeme_type, type_value in lexeme.LEXEME_TYPES.items():
+            #     if lexeme_type == "FACT":
+            #         if elem in type_value:
+            #             pass
+            #     else:
+            #         pass
+
+    def _create_rule(self, line):
+        lexemes_list = []
+
+        # split_line = line.split()
+
+        # operands_count = 0
+        braces_count = 0
+        # conclusion_op = 0
+
+        for i in range(len(line)):
+            if line[i].isspace():
+                continue
+            elif line[i] in lexeme.LEXEME_TYPES["FACT"]:
+                lexemes_list.append(lexeme.Lexeme(lexeme.LEXEME_TYPES["FACT"], line[i]))
+            elif line[i] == lexeme.LEXEME_TYPES["LEFT_BRACE"]:
+                braces_count += 1
+                lexemes_list.append(lexeme.Lexeme(lexeme.LEXEME_TYPES["LEFT_BRACE"], line[i]))
+            elif line[i] == lexeme.LEXEME_TYPES["RIGHT_BRACE"]:
+                lexemes_list.append(lexeme.Lexeme(lexeme.LEXEME_TYPES["RIGHT_BRACE"], line[i]))
+            else:
+                cut_line = line[i:]
+
+                for l_type, l_value in lexeme.LEXEME_OPERATORS.items():
+                    if cut_line.startswith(l_value):
+                        lexemes_list.append(lexeme.Lexeme(l_type, l_value))
+                        break
+
+        for i in lexemes_list:
+            print(i._value)
+
+        return lexemes_list
