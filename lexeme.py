@@ -21,7 +21,7 @@ class Lexeme:
 
 
 LEXEME_TYPES = {
-    "FACT": set(string.ascii_uppercase),
+    "FACT": tuple(string.ascii_uppercase),
     "LEFT_BRACE": "(",
     "RIGHT_BRACE": ")",
     "OP_NOT": "!",
@@ -32,7 +32,7 @@ LEXEME_TYPES = {
     "OP_BICONDITION": "<=>"
 }
 
-LEXEME_OPERATORS = {
+LEXEME_VALUE_OPERANDS = {
     "OP_AND": LEXEME_TYPES["OP_AND"],
     "OP_OR": LEXEME_TYPES["OP_OR"],
     "OP_XOR": LEXEME_TYPES["OP_XOR"],
