@@ -16,8 +16,8 @@ class RuleNode:
 
 class Lexeme:
     def __init__(self, l_type, l_value):
-        self._type = l_type
-        self._value = l_value
+        self.type = l_type
+        self.value = l_value
 
 
 LEXEME_TYPES = {
@@ -32,10 +32,32 @@ LEXEME_TYPES = {
     "OP_BICONDITION": "<=>"
 }
 
-LEXEME_VALUE_OPERANDS = {
+LEXEME_SYMBOLS = {
+    "LEFT_BRACE": LEXEME_TYPES["LEFT_BRACE"],
+    "RIGHT_BRACE": LEXEME_TYPES["RIGHT_BRACE"],
+    "OP_NOT": LEXEME_TYPES["OP_NOT"],
     "OP_AND": LEXEME_TYPES["OP_AND"],
     "OP_OR": LEXEME_TYPES["OP_OR"],
     "OP_XOR": LEXEME_TYPES["OP_XOR"],
+    "OP_IMPLIES": LEXEME_TYPES["OP_IMPLIES"],
+    "OP_BICONDITION": LEXEME_TYPES["OP_BICONDITION"]
+}
+
+# LEXEME_VALUE_OPERANDS = {
+#     "OP_AND": LEXEME_TYPES["OP_AND"],
+#     "OP_OR": LEXEME_TYPES["OP_OR"],
+#     "OP_XOR": LEXEME_TYPES["OP_XOR"],
+#     "OP_IMPLIES": LEXEME_TYPES["OP_IMPLIES"],
+#     "OP_BICONDITION": LEXEME_TYPES["OP_BICONDITION"]
+# }
+
+LEXEME_INFIX_OPERANDS = {
+    "OP_AND": LEXEME_TYPES["OP_AND"],
+    "OP_OR": LEXEME_TYPES["OP_OR"],
+    "OP_XOR": LEXEME_TYPES["OP_XOR"]
+}
+
+LEXEME_EQUATION_OPERANDS = {
     "OP_IMPLIES": LEXEME_TYPES["OP_IMPLIES"],
     "OP_BICONDITION": LEXEME_TYPES["OP_BICONDITION"]
 }
