@@ -1,5 +1,5 @@
-import lexeme
 from lexer_exception import LexerException
+from lexeme import *
 import networkx as nx
 
 
@@ -15,8 +15,8 @@ class Lexer:
 
         self._graph = nx.DiGraph()
         # self._graph.add_node(1)
-        # self._graph.add_edge(1, 2)
-        # print(self._graph)
+        self._graph.add_edge(1, 2)
+        print(self._graph.nodes)
 
     def tokenize_file(self):
         with open(self._filename, "r") as file:
@@ -83,8 +83,8 @@ class Lexer:
             raise LexerException("Initial facts line occurred twice")
 
         for fact in facts[1:]:
-            if fact in lexeme.LEXEME_TYPES["FACT"]:
-                self._true_initial_facts.append(lexeme.Lexeme(lexeme.LEXEME_TYPES["FACT"], fact))
+            if fact in LexemeTypes.FACT.value:
+                self._true_initial_facts.append(Lexeme(LexemeTypes.FACT, fact))
             else:
                 raise LexerException("Invalid fact in initial facts")
 
@@ -98,8 +98,8 @@ class Lexer:
             raise LexerException("No queries are specified")
 
         for query in queries[1:]:
-            if query in lexeme.LEXEME_TYPES["FACT"]:
-                self._queries.append(lexeme.Lexeme(lexeme.LEXEME_TYPES["FACT"], query))
+            if query in LexemeTypes.FACT.value:
+                self._queries.append(Lexeme(LexemeTypes.FACT, query))
             else:
                 raise LexerException("Invalid fact in queries")
 
@@ -119,16 +119,16 @@ class Lexer:
                 continue
             elif line[i].isspace():
                 continue
-            elif line[i] in lexeme.LEXEME_TYPES["FACT"]:
-                lexeme_list.append(lexeme.Lexeme(lexeme.LEXEME_TYPES["FACT"], line[i]))
+            elif line[i] in LexemeTypes.FACT.value:
+                lexeme_list.append(Lexeme(LexemeTypes.FACT, line[i]))
             else:
                 cut_line = line[i:]
                 operand_found = False
 
-                for l_type, l_value in lexeme.LEXEME_SYMBOLS.items():
-                    if cut_line.startswith(l_value):
-                        lexeme_list.append(lexeme.Lexeme(l_type, l_value))
-                        chars_to_skip = len(l_value) - 1
+                for l_type in LEXEME_SYMBOLS:
+                    if cut_line.startswith(l_type.value):
+                        lexeme_list.append(Lexeme(l_type, l_type.value))
+                        chars_to_skip = len(l_type.value) - 1
                         operand_found = True
 
                 if not operand_found:
@@ -142,7 +142,7 @@ class Lexer:
         conclusion_op = None
 
         for token in rule:
-            if token.type in lexeme.LEXEME_EQUATION_SIGNS.keys():
+            if token.type in LEXEME_IMPLICATION_TYPES:
                 if not conclusion_op:
                     conclusion_op = token
                 else:
@@ -167,26 +167,40 @@ class Lexer:
     def _convert_to_rpl(self, token_list):
         output = []
         stack = []
+        expect_operand = True
 
         for token in token_list:
-            if token.type in lexeme.LEXEME_TYPES["FACT"]:
+            if token.type == LexemeTypes.FACT:
+                if not expect_operand:
+                    raise LexerException("Expecting operator")
+
+                expect_operand = False
 
                 output.append(token)
+            elif token.type in LEXEME_PREFIX_OPERANDS:
+                if not expect_operand:
+                    raise LexerException("Expecting operand")
 
-            elif token.type == lexeme.LEXEME_TYPES["OP_NOT"]:
+                expect_operand = True
 
                 stack.append(token)
+            elif token.type == LexemeTypes.LEFT_BRACKET:
+                if not expect_operand:
+                    raise LexerException("Expecting operand")
 
-            elif token.type == lexeme.LEXEME_TYPES["LEFT_BRACKET"]:
+                expect_operand = True
 
                 stack.append(token)
+            elif token.type == LexemeTypes.RIGHT_BRACKET:
+                if expect_operand:
+                    raise LexerException("Expecting operand")
 
-            elif token.type == lexeme.LEXEME_TYPES["RIGHT_BRACKET"]:
+                expect_operand = False
 
                 while stack:
                     last_token = stack.pop()
 
-                    if last_token.type == lexeme.LEXEME_TYPES["LEFT_BRACKET"]:
+                    if last_token.type == LexemeTypes.LEFT_BRACKET:
                         break
 
                     output.append(last_token)
@@ -194,12 +208,26 @@ class Lexer:
                 if not stack:
                     raise LexerException("Invalid brackets count")
 
-            elif token.type in lexeme.LEXEME_INFIX_OPERANDS:
+            elif token.type in LEXEME_INFIX_OPERANDS:
+                if expect_operand:
+                    raise LexerException("Expecting operand")
 
-                pass
+                expect_operand = True
+
+                while stack:
+                    last_stack_token = stack[-1]
+
+                    if last_stack_token.type in LEXEME_PREFIX_OPERANDS or \
+                            LEXEME_INFIX_OPERANDS.index(last_stack_token.type) >= \
+                            LEXEME_INFIX_OPERANDS.index(token.type):
+                        output.append(stack.pop())
+                    else:
+                        break
+
+                stack.append(token)
 
         for op in stack:
-            if op in lexeme.LEXEME_OPERANDS:
+            if op.type in LEXEME_OPERANDS:
                 output.append(op)
             else:
                 raise LexerException("Invalid brackets count")
@@ -210,100 +238,10 @@ class Lexer:
 
         left_side, conclusion_op, right_side = self._partition_rule(rule)
 
-        # for i in lexeme.LEXEME_OPERANDS:
-        #     print(i)
+        rpl_left_side = self._convert_to_rpl(left_side)
+        rpl_right_side = self._convert_to_rpl(right_side)
 
-    # def _create_rule(self, line):
-    #     # lexemes_list = []
-    #
-    #     stack = []
-    #     output = []
-    #
-    #     for i in range(len(line)):
-    #         if line[i].isspace():
-    #             continue
-    #         elif line[i] in lexeme.LEXEME_TYPES["FACT"]:
-    #             output.append(lexeme.Lexeme(lexeme.LEXEME_TYPES["FACT"], line[i]))
-    #         elif line[i] == lexeme.LEXEME_TYPES["OP_NOT"]:
-    #             stack.append(lexeme.Lexeme(lexeme.LEXEME_TYPES["OP_NOT"], line[i]))
-    #         elif line[i] == lexeme.LEXEME_TYPES["LEFT_BRACKET"]:
-    #             stack.append(lexeme.Lexeme(lexeme.LEXEME_TYPES["LEFT_BRACKET"], line[i]))
-    #         elif line[i] == lexeme.LEXEME_TYPES["RIGHT_BRACKET"]:
-    #             pass
-    #
-    #             # lexemes_list.append(lexeme.Lexeme(lexeme.LEXEME_TYPES["RIGHT_BRACKET"], line[i]))
-    #         else:
-    #             cut_line = line[i:]
-    #             # operand_found = False
-    #
-    #             for l_type, l_value in lexeme.LEXEME_INFIX_OPERANDS.items():
-    #                 if cut_line.startswith(l_value):
-    #                     stack.append(lexeme.Lexeme(l_type, l_value))
-    #                     # chars_to_skip = len(l_value) - 1
-    #                     # value_operands_count -= 1
-    #                     # operand_found = True
-    #
-    #             # if not operand_found:
-    #             #     raise LexerException("Invalid operator")
-    #
-    #     # if braces_count:
-    #     #     raise LexerException("Invalid braces count")
-    #     #
-    #     # if value_operands_count != 1:
-    #     #     raise LexerException("Invalid rule")
-    #
-    #     # return lexemes_list
+        for i in rpl_left_side:
+            print(i.value, end=" ")
 
-    # def _create_rule(self, line):
-    #     lexemes_list = []
-    #
-    #     chars_to_skip = 0
-    #     value_operands_count = 0
-    #     braces_count = 0
-    #
-    #     for i in range(len(line)):
-    #         if chars_to_skip:
-    #             chars_to_skip -= 1
-    #             continue
-    #         elif line[i].isspace():
-    #             continue
-    #         elif line[i] in lexeme.LEXEME_TYPES["FACT"]:
-    #             lexemes_list.append(lexeme.Lexeme(lexeme.LEXEME_TYPES["FACT"], line[i]))
-    #             value_operands_count += 1
-    #         elif line[i] == lexeme.LEXEME_TYPES["OP_NOT"]:
-    #             lexemes_list.append(lexeme.Lexeme(lexeme.LEXEME_TYPES["OP_NOT"], line[i]))
-    #
-    #             cut_line = line[i + len(lexeme.LEXEME_TYPES["OP_NOT"]):]
-    #
-    #             if not (cut_line.startswith(lexeme.LEXEME_TYPES["FACT"]) or
-    #                     cut_line.startswith(lexeme.LEXEME_TYPES["LEFT_BRACKET"]) or
-    #                     cut_line.startswith(lexeme.LEXEME_TYPES["OP_NOT"])):
-    #                 raise LexerException("Invalid value after negation operator")
-    #
-    #         elif line[i] == lexeme.LEXEME_TYPES["LEFT_BRACKET"]:
-    #             lexemes_list.append(lexeme.Lexeme(lexeme.LEXEME_TYPES["LEFT_BRACKET"], line[i]))
-    #             braces_count += 1
-    #         elif line[i] == lexeme.LEXEME_TYPES["RIGHT_BRACKET"]:
-    #             lexemes_list.append(lexeme.Lexeme(lexeme.LEXEME_TYPES["RIGHT_BRACKET"], line[i]))
-    #             braces_count -= 1
-    #         else:
-    #             cut_line = line[i:]
-    #             operand_found = False
-    #
-    #             for l_type, l_value in lexeme.LEXEME_VALUE_OPERANDS.items():
-    #                 if cut_line.startswith(l_value):
-    #                     lexemes_list.append(lexeme.Lexeme(l_type, l_value))
-    #                     chars_to_skip = len(l_value) - 1
-    #                     value_operands_count -= 1
-    #                     operand_found = True
-    #
-    #             if not operand_found:
-    #                 raise LexerException("Invalid operator")
-    #
-    #     if braces_count:
-    #         raise LexerException("Invalid braces count")
-    #
-    #     if value_operands_count != 1:
-    #         raise LexerException("Invalid rule")
-    #
-    #     return lexemes_list
+        print("")

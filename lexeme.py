@@ -1,9 +1,9 @@
 import string
+from enum import Enum
 
 
 class FactNode:
     def __init__(self, fact_name, value):
-        # self._type = l_type
         self._value = fact_name
         self._value = value
 
@@ -20,54 +20,46 @@ class Lexeme:
         self.value = l_value
 
 
-LEXEME_TYPES = {
-    "FACT": tuple(string.ascii_uppercase),
-    "LEFT_BRACKET": "(",
-    "RIGHT_BRACKET": ")",
-    "OP_NOT": "!",
-    "OP_AND": "+",
-    "OP_OR": "|",
-    "OP_XOR": "^",
-    "OP_IMPLIES": "=>",
-    "OP_BICONDITION": "<=>"
-}
+class LexemeTypes(Enum):
+    FACT = tuple(string.ascii_uppercase)
+    LEFT_BRACKET = "("
+    RIGHT_BRACKET = ")"
+    OP_NOT = "!"
+    OP_AND = "+"
+    OP_OR = "|"
+    OP_XOR = "^"
+    OP_IMPLIES = "=>"
+    OP_BICONDITION = "<=>"
 
-LEXEME_SYMBOLS = {
-    "LEFT_BRACKET": LEXEME_TYPES["LEFT_BRACKET"],
-    "RIGHT_BRACKET": LEXEME_TYPES["RIGHT_BRACKET"],
-    "OP_NOT": LEXEME_TYPES["OP_NOT"],
-    "OP_AND": LEXEME_TYPES["OP_AND"],
-    "OP_OR": LEXEME_TYPES["OP_OR"],
-    "OP_XOR": LEXEME_TYPES["OP_XOR"],
-    "OP_IMPLIES": LEXEME_TYPES["OP_IMPLIES"],
-    "OP_BICONDITION": LEXEME_TYPES["OP_BICONDITION"]
-}
 
-# LEXEME_VALUE_OPERANDS = {
-#     "OP_AND": LEXEME_TYPES["OP_AND"],
-#     "OP_OR": LEXEME_TYPES["OP_OR"],
-#     "OP_XOR": LEXEME_TYPES["OP_XOR"],
-#     "OP_IMPLIES": LEXEME_TYPES["OP_IMPLIES"],
-#     "OP_BICONDITION": LEXEME_TYPES["OP_BICONDITION"]
-# }
+LEXEME_SYMBOLS = [
+    LexemeTypes.LEFT_BRACKET,
+    LexemeTypes.RIGHT_BRACKET,
+    LexemeTypes.OP_NOT,
+    LexemeTypes.OP_AND,
+    LexemeTypes.OP_OR,
+    LexemeTypes.OP_XOR,
+    LexemeTypes.OP_IMPLIES,
+    LexemeTypes.OP_BICONDITION
+]
 
-LEXEME_PREFIX_OPERANDS = {
-    "OP_NOT": LEXEME_TYPES["OP_NOT"]
-}
+LEXEME_PREFIX_OPERANDS = [
+    LexemeTypes.OP_NOT
+]
 
-LEXEME_INFIX_OPERANDS = {
-    "OP_AND": LEXEME_TYPES["OP_AND"],
-    "OP_OR": LEXEME_TYPES["OP_OR"],
-    "OP_XOR": LEXEME_TYPES["OP_XOR"]
-}
+# Order values in increasing priority
+LEXEME_INFIX_OPERANDS = [
+    LexemeTypes.OP_XOR,
+    LexemeTypes.OP_OR,
+    LexemeTypes.OP_AND,
+]
 
 LEXEME_OPERANDS = {
-    **LEXEME_PREFIX_OPERANDS,
-    **LEXEME_INFIX_OPERANDS
+    *LEXEME_PREFIX_OPERANDS,
+    *LEXEME_INFIX_OPERANDS
 }
 
-LEXEME_EQUATION_SIGNS = {
-    "OP_IMPLIES": LEXEME_TYPES["OP_IMPLIES"],
-    "OP_BICONDITION": LEXEME_TYPES["OP_BICONDITION"]
-}
-
+LEXEME_IMPLICATION_TYPES = [
+    LexemeTypes.OP_IMPLIES,
+    LexemeTypes.OP_BICONDITION
+]
