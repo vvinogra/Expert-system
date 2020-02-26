@@ -1,6 +1,7 @@
 from lexer_exception import LexerException
 from lexeme import *
 import networkx as nx
+import matplotlib.pyplot as plt
 
 
 class Lexer:
@@ -13,10 +14,10 @@ class Lexer:
         self._true_initial_facts = []
         self._queries = []
 
-        self._graph = nx.DiGraph()
+        self._graph = nx.MultiDiGraph()
         # self._graph.add_node(1)
-        self._graph.add_edge(1, 2)
-        print(self._graph.nodes)
+        # self._graph.add_edge(1, 2)
+        # print(self._graph.nodes)
 
     def tokenize_file(self):
         with open(self._filename, "r") as file:
@@ -75,6 +76,40 @@ class Lexer:
                 # print(split_line)
                 pass
 
+        # for i in self._graph.nodes:
+        #     print("i.name = {}; i._rule_queries = {}".format(i.name, i._rule_queries))
+
+        nx.draw(self._graph,
+                with_labels=True,
+                arrows=True,
+                pos=nx.circular_layout(self._graph))
+
+        # nx.drawing.nx_pydot.write_dot(self._graph, "test.png")
+
+        # edge_labels = nx.get_edge_attributes(self._graph, 'rule')
+        #
+        # for a,b,c in edge_labels:
+        #     print(a, b, c)
+
+        # edge_labels = self._graph.edges.data(True)
+
+        # print(edge_labels)
+
+        # edge_labels = dict([((u, v,), d['rule'])
+        #                     for u, v, d in self._graph.edges(data=True)])
+        #
+        # nx.draw_networkx_edge_labels(self._graph,
+        #                              nx.circular_layout(self._graph),
+        #                              edge_labels=edge_labels,
+        #                              rotate=True,
+        #                              font_size=6)
+
+        # nx.draw_networkx_edges(self._graph,
+        #                        with_labels=True,
+        #                        arrows=True,
+        #                        pos=nx.circular_layout(self._graph),
+        #                        node_size=100)
+        plt.show()
         # print(self._queries)
         # print(self._true_initial_facts)
 
@@ -234,14 +269,45 @@ class Lexer:
 
         return output
 
+    def _get_fact_tokens(self, rule):
+        left_side_facts = []
+
+        for token in rule:
+            if token.type == LexemeTypes.FACT:
+                left_side_facts.append(token)
+
+        return left_side_facts
+
+    def _parse_right_side(self, right_side, parsed_left_side, rule_node):
+        if len(right_side) == 1:
+            if right_side[0].type == LexemeTypes.FACT:
+                lhs_fact_tokens = self._get_fact_tokens(parsed_left_side)
+
+                for token in lhs_fact_tokens:
+                    self._graph.add_edge(FactNode(right_side[0].value),
+                                         FactNode(token.value), rule=rule_node)
+
+        elif len(right_side) == 2:
+            op, val = right_side
+
+            if op.type == LexemeTypes.OP_NOT:
+                lhs_fact_tokens = self._get_fact_tokens(parsed_left_side)
+
+                # for token in lhs_fact_tokens:
+                #     self._graph.add_edge(FactNode(val.value),
+                #                          FactNode(token.value), rule=rule_node)
+
     def _parse_rule(self, rule):
 
         left_side, conclusion_op, right_side = self._partition_rule(rule)
 
         rpl_left_side = self._convert_to_rpl(left_side)
-        rpl_right_side = self._convert_to_rpl(right_side)
 
-        for i in rpl_left_side:
-            print(i.value, end=" ")
+        rule_node = RuleNode(left_side, conclusion_op, right_side)
 
-        print("")
+        self._parse_right_side(right_side, rpl_left_side, rule_node)
+
+        # for i in rpl_left_side:
+        #     print(i.value, end=" ")
+        #
+        # print("")
