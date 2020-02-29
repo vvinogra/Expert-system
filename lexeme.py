@@ -22,19 +22,57 @@ class RuleNode:
     def __eq__(self, other):
         return self.full_rule == other.full_rule
 
-    # def _solve_rule(self, graph):
-
-    def _get_fact_tokens(self):
+    def get_left_side_facts(self):
         left_side_facts = []
 
         for token in self.left_side:
-            if token.type == LexemeTypes.FACT:
+            if type(token) is Fact:
                 left_side_facts.append(token)
 
         return left_side_facts
 
+    def get_right_side_facts(self):
+        right_side_facts = []
 
-class LexemeTypes(Enum):
+        for token in self.right_side:
+            if type(token) is Fact:
+                right_side_facts.append(token)
+
+        return right_side_facts
+
+    def solve_right_side(self, res):
+        if len(self.right_side) == 1:
+            val = self.right_side[0]
+
+            if type(val) is Fact:
+                return res
+            else:
+                raise BaseException("Invalid right rule side")
+        elif len(self.right_side) == 2:
+            operator, val = self.right_side
+
+            if type(operator) is Operator and operator.is_prefix_operator() \
+                    and type(val) is Fact:
+                return operator.eval(res)
+            else:
+                raise BaseException("Invalid right rule side")
+        elif len(self.right_side) == 3:
+            v1, operator, v2 = self.right_side
+
+            if type(operator) is Operator and operator.is_infix_operator() \
+                    and type(v1) is Fact and type(v2) is Fact:
+
+                if operator.op == LexemeTypes.OP_AND:
+                    return res
+                else:
+                    raise BaseException("Invalid right rule side")
+            else:
+                raise BaseException("Invalid right rule side")
+        else:
+            raise BaseException("Invalid right rule side")
+
+
+class LexemeTypes:
     FACT = tuple(string.ascii_uppercase)
     LEFT_BRACKET = "("
     RIGHT_BRACKET = ")"
@@ -46,42 +84,42 @@ class LexemeTypes(Enum):
     OP_BICONDITION = "<=>"
 
 
-class Lexeme:
-    _infix_operators_list = [
-        LexemeTypes.OP_XOR.value,
-        LexemeTypes.OP_OR.value,
-        LexemeTypes.OP_AND.value,
-    ]
-
-    _prefix_operators_list = [
-        LexemeTypes.OP_NOT.value,
-    ]
-
-    _conclusion_operators_list = [
-        LexemeTypes.OP_IMPLIES.value,
-        LexemeTypes.OP_BICONDITION.value
-    ]
-
-    _other_operators_list = [
-        LexemeTypes.LEFT_BRACKET.value,
-        LexemeTypes.RIGHT_BRACKET.value,
-    ]
-
-    def __init__(self):
-        pass
-
-    @staticmethod
-    def operators_list():
-        return [
-            *Lexeme._infix_operators_list,
-            *Lexeme._prefix_operators_list,
-            *Lexeme._conclusion_operators_list,
-            *Lexeme._other_operators_list
-        ]
-
-    @staticmethod
-    def is_fact(value):
-        return value in LexemeTypes.FACT.value
+# class Lexeme:
+#     _infix_operators_list = [
+#         LexemeTypes.OP_XOR,
+#         LexemeTypes.OP_OR,
+#         LexemeTypes.OP_AND,
+#     ]
+#
+#     _prefix_operators_list = [
+#         LexemeTypes.OP_NOT,
+#     ]
+#
+#     _conclusion_operators_list = [
+#         LexemeTypes.OP_IMPLIES,
+#         LexemeTypes.OP_BICONDITION
+#     ]
+#
+#     _other_operators_list = [
+#         LexemeTypes.LEFT_BRACKET,
+#         LexemeTypes.RIGHT_BRACKET,
+#     ]
+#
+#     # def __init__(self):
+#     #     pass
+#
+#     @staticmethod
+#     def operators_list():
+#         return [
+#             *Lexeme._infix_operators_list,
+#             *Lexeme._prefix_operators_list,
+#             *Lexeme._conclusion_operators_list,
+#             *Lexeme._other_operators_list
+#         ]
+#
+#     @staticmethod
+#     def is_fact(value):
+#         return value in LexemeTypes.FACT
 
 
 class Fact:
@@ -137,23 +175,23 @@ class Fact:
 class Operator:
     # Order values in increasing priority
     infix_operators_list = [
-        LexemeTypes.OP_XOR.value,
-        LexemeTypes.OP_OR.value,
-        LexemeTypes.OP_AND.value,
+        LexemeTypes.OP_XOR,
+        LexemeTypes.OP_OR,
+        LexemeTypes.OP_AND,
     ]
 
     prefix_operators_list = [
-        LexemeTypes.OP_NOT.value,
+        LexemeTypes.OP_NOT,
     ]
 
     conclusion_operators_list = [
-        LexemeTypes.OP_IMPLIES.value,
-        LexemeTypes.OP_BICONDITION.value
+        LexemeTypes.OP_IMPLIES,
+        LexemeTypes.OP_BICONDITION
     ]
 
     other_operators_list = [
-        LexemeTypes.LEFT_BRACKET.value,
-        LexemeTypes.RIGHT_BRACKET.value,
+        LexemeTypes.LEFT_BRACKET,
+        LexemeTypes.RIGHT_BRACKET,
     ]
 
     def __init__(self, op):
@@ -175,13 +213,13 @@ class Operator:
         return self.op in Operator.conclusion_operators_list
 
     def eval(self, left, right=None):
-        if self.op == LexemeTypes.OP_XOR.value:
+        if self.op == LexemeTypes.OP_XOR:
             return left ^ right
-        elif self.op == LexemeTypes.OP_OR.value:
+        elif self.op == LexemeTypes.OP_OR:
             return left | right
-        elif self.op == LexemeTypes.OP_AND.value:
+        elif self.op == LexemeTypes.OP_AND:
             return left & right
-        elif self.op == LexemeTypes.OP_NOT.value:
+        elif self.op == LexemeTypes.OP_NOT:
             return ~left
 
     @staticmethod
@@ -194,34 +232,34 @@ class Operator:
         ]
 
 
-LEXEME_SYMBOLS = [
-    LexemeTypes.LEFT_BRACKET,
-    LexemeTypes.RIGHT_BRACKET,
-    LexemeTypes.OP_NOT,
-    LexemeTypes.OP_AND,
-    LexemeTypes.OP_OR,
-    LexemeTypes.OP_XOR,
-    LexemeTypes.OP_IMPLIES,
-    LexemeTypes.OP_BICONDITION
-]
-
-LEXEME_PREFIX_OPERANDS = [
-    LexemeTypes.OP_NOT
-]
-
-# Order values in increasing priority
-LEXEME_INFIX_OPERANDS = [
-    LexemeTypes.OP_XOR,
-    LexemeTypes.OP_OR,
-    LexemeTypes.OP_AND,
-]
-
-LEXEME_OPERANDS = {
-    *LEXEME_PREFIX_OPERANDS,
-    *LEXEME_INFIX_OPERANDS
-}
-
-LEXEME_IMPLICATION_TYPES = [
-    LexemeTypes.OP_IMPLIES,
-    LexemeTypes.OP_BICONDITION
-]
+# LEXEME_SYMBOLS = [
+#     LexemeTypes.LEFT_BRACKET,
+#     LexemeTypes.RIGHT_BRACKET,
+#     LexemeTypes.OP_NOT,
+#     LexemeTypes.OP_AND,
+#     LexemeTypes.OP_OR,
+#     LexemeTypes.OP_XOR,
+#     LexemeTypes.OP_IMPLIES,
+#     LexemeTypes.OP_BICONDITION
+# ]
+#
+# LEXEME_PREFIX_OPERANDS = [
+#     LexemeTypes.OP_NOT
+# ]
+#
+# # Order values in increasing priority
+# LEXEME_INFIX_OPERANDS = [
+#     LexemeTypes.OP_XOR,
+#     LexemeTypes.OP_OR,
+#     LexemeTypes.OP_AND,
+# ]
+#
+# LEXEME_OPERANDS = {
+#     *LEXEME_PREFIX_OPERANDS,
+#     *LEXEME_INFIX_OPERANDS
+# }
+#
+# LEXEME_IMPLICATION_TYPES = [
+#     LexemeTypes.OP_IMPLIES,
+#     LexemeTypes.OP_BICONDITION
+# ]

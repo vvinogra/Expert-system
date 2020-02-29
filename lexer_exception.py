@@ -1,3 +1,0 @@
-
-class LexerException(BaseException):
-    pass

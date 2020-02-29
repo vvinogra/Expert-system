@@ -1,0 +1,2 @@
+class InferenceEngineException(BaseException):
+    pass
