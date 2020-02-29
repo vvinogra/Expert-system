@@ -3,8 +3,8 @@
 import sys
 import logging
 import argparse
-from parser.parser import Parser
-from inference_engine.inference_engine import InferenceEngine
+from expert_system.parser.parser import Parser
+from expert_system.inference_engine.inference_engine import InferenceEngine
 
 
 def check_python_version():
@@ -24,12 +24,12 @@ def argument_parser():
 
 
 def configure_verbose_logging(is_verbose):
-    logging_format = "%(levelname)s: %(message)s"
+    logging_format = "%(message)s"
 
     if is_verbose:
-        logging.basicConfig(level=logging.INFO, format=logging_format)
+        logging.basicConfig(level=logging.DEBUG, format=logging_format)
     else:
-        logging.basicConfig(level=logging.WARNING, format=logging_format)
+        logging.basicConfig(level=logging.INFO, format=logging_format)
 
 
 if __name__ == "__main__":

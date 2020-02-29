@@ -2,7 +2,7 @@ import string
 from enum import Enum
 
 
-class RuleNode:
+class Rule:
     def __init__(self, left_side, conclusion_op, right_side):
         self.left_side = left_side
         self.conclusion_op = conclusion_op
@@ -220,7 +220,7 @@ class Operator:
         elif self.op == LexemeTypes.OP_AND:
             return left & right
         elif self.op == LexemeTypes.OP_NOT:
-            return ~left
+            return not left
 
     @staticmethod
     def operators_list():

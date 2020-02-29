@@ -138,6 +138,47 @@ class InferenceEngine:
 
         return output
 
+    def _solve_rpn(self, token_list):
+        stack = []
+
+        for token in token_list:
+            if type(token) is Fact:
+                stack.append(token)
+            elif type(token) is Operator:
+                if token.is_infix_operator():
+                    op1 = stack.pop()
+                    op2 = stack.pop()
+
+                    if type(op1) is bool:
+                        op1_val = op1
+                    else:
+                        if op1 not in self._initial_facts:
+                            self._resolve_query(op1)
+                        op1_val = self._graph.nodes[op1]["value"]
+
+                    if type(op2) is bool:
+                        op2_val = op2
+                    else:
+                        if op2 not in self._initial_facts:
+                            self._resolve_query(op2)
+                        op2_val = self._graph.nodes[op2]["value"]
+
+                    stack.append(token.eval(op1_val, op2_val))
+                elif token.is_prefix_operator():
+                    op = stack.pop()
+
+                    if type(op) is bool:
+                        op_val = op
+                    else:
+                        if op not in self._initial_facts:
+                            self._resolve_query(op)
+
+                        op_val = self._graph.nodes[op]["value"]
+
+                    stack.append(token.eval(op_val))
+
+        return stack[0]
+
     def _resolve_query(self, query):
         result = []
 
@@ -146,18 +187,22 @@ class InferenceEngine:
                 rpn_left_side = self._convert_to_rpn(neighbor.left_side)
 
                 res_left = self._solve_rpn(rpn_left_side)
-                #
-                # res = neighbor.solve_right_side(res_left)
-                #
-                # result.append(res)
 
-        # if len(result):
-        #     if not all(x == result[0] for x in result):
-        #         raise BaseException("Contradiction in facts")
-        #     self._graph.nodes[query]["value"] = result[0]
-        # else:
-        #     self._graph.nodes[query]["value"] = False
+                res = neighbor.solve_right_side(res_left)
+
+                result.append(res)
+
+        if len(result):
+            if not all(x == result[0] for x in result):
+                raise BaseException("Contradiction in facts")
+            self._graph.nodes[query]["value"] = result[0]
+        else:
+            self._graph.nodes[query]["value"] = False
 
     def resolve_queries(self):
         for query in self._queries:
             self._resolve_query(query)
+            logging.info("{query} = {value}".format(query=query, value=self._graph.nodes[query]["value"]))
+
+        if self.graphic:
+            self._show_graph_plot()

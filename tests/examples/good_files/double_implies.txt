@@ -1,0 +1,15 @@
+#C <=> D  # C and D are True
+#C <=> F  # C and F are True
+
+C | F => C
+!F => C
+
+#C + F <=> D
+
+#!D => C
+
+=FD
+?FC
+
+# assertions
+# =FCD

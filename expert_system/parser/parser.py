@@ -1,6 +1,5 @@
-from parser.parser_exception import ParserException
+from .parser_exception import ParserException
 from lexeme import *
-import networkx as nx
 
 
 class Parser:
@@ -14,7 +13,7 @@ class Parser:
         self.queries = []
         self.rules = []
 
-        self._graph = nx.MultiDiGraph()
+        # self._graph = nx.MultiDiGraph()
 
         # self._initialize_nodes()
 
@@ -192,117 +191,117 @@ class Parser:
 
         return left_side, conclusion_op, right_side
 
-    def _convert_to_rpn(self, token_list):
-        output = []
-        stack = []
-        expect_operand = True
+    # def _convert_to_rpn(self, token_list):
+    #     output = []
+    #     stack = []
+    #     expect_operand = True
+    #
+    #     for token in token_list:
+    #         if type(token) is Fact:
+    #             if not expect_operand:
+    #                 raise ParserException("Expecting operator")
+    #
+    #             expect_operand = False
+    #
+    #             output.append(token)
+    #         elif type(token) is Operator:
+    #             if token.is_prefix_operator():
+    #                 if not expect_operand:
+    #                     raise ParserException("Expecting operand")
+    #
+    #                 expect_operand = True
+    #
+    #                 stack.append(token)
+    #             elif token.op == LexemeTypes.LEFT_BRACKET:
+    #                 if not expect_operand:
+    #                     raise ParserException("Expecting operand")
+    #
+    #                 expect_operand = True
+    #
+    #                 stack.append(token)
+    #             elif token.op == LexemeTypes.RIGHT_BRACKET:
+    #                 if expect_operand:
+    #                     raise ParserException("Expecting operand")
+    #
+    #                 expect_operand = False
+    #
+    #                 while stack:
+    #                     last_token = stack.pop()
+    #
+    #                     if last_token.op == LexemeTypes.LEFT_BRACKET:
+    #                         break
+    #
+    #                     output.append(last_token)
+    #
+    #                 if not stack:
+    #                     raise ParserException("Invalid brackets count")
+    #
+    #             elif token.is_infix_operator():
+    #                 if expect_operand:
+    #                     raise ParserException("Expecting operand")
+    #
+    #                 expect_operand = True
+    #
+    #                 while stack:
+    #                     last_stack_token = stack[-1]
+    #
+    #                     if last_stack_token.is_prefix_operator() or \
+    #                             Operator.infix_operators_list.index(last_stack_token.op) >= \
+    #                             Operator.infix_operators_list.index(token.op):
+    #                         output.append(stack.pop())
+    #                     else:
+    #                         break
+    #
+    #                 stack.append(token)
+    #
+    #     for op in stack:
+    #         if op.is_prefix_operator() or \
+    #                 op.is_infix_operator():
+    #             output.append(op)
+    #         else:
+    #             raise ParserException("Invalid brackets count")
+    #
+    #     return output
 
-        for token in token_list:
-            if type(token) is Fact:
-                if not expect_operand:
-                    raise ParserException("Expecting operator")
-
-                expect_operand = False
-
-                output.append(token)
-            elif type(token) is Operator:
-                if token.is_prefix_operator():
-                    if not expect_operand:
-                        raise ParserException("Expecting operand")
-
-                    expect_operand = True
-
-                    stack.append(token)
-                elif token.op == LexemeTypes.LEFT_BRACKET:
-                    if not expect_operand:
-                        raise ParserException("Expecting operand")
-
-                    expect_operand = True
-
-                    stack.append(token)
-                elif token.op == LexemeTypes.RIGHT_BRACKET:
-                    if expect_operand:
-                        raise ParserException("Expecting operand")
-
-                    expect_operand = False
-
-                    while stack:
-                        last_token = stack.pop()
-
-                        if last_token.op == LexemeTypes.LEFT_BRACKET:
-                            break
-
-                        output.append(last_token)
-
-                    if not stack:
-                        raise ParserException("Invalid brackets count")
-
-                elif token.is_infix_operator():
-                    if expect_operand:
-                        raise ParserException("Expecting operand")
-
-                    expect_operand = True
-
-                    while stack:
-                        last_stack_token = stack[-1]
-
-                        if last_stack_token.is_prefix_operator() or \
-                                Operator.infix_operators_list.index(last_stack_token.op) >= \
-                                Operator.infix_operators_list.index(token.op):
-                            output.append(stack.pop())
-                        else:
-                            break
-
-                    stack.append(token)
-
-        for op in stack:
-            if op.is_prefix_operator() or \
-                    op.is_infix_operator():
-                output.append(op)
-            else:
-                raise ParserException("Invalid brackets count")
-
-        return output
-
-    def _solve_rpn(self, token_list):
-        stack = []
-
-        for token in token_list:
-            if type(token) is Fact:
-                stack.append(token)
-            elif type(token) is Operator:
-                if token.is_infix_operator():
-                    op1 = stack.pop()
-                    op2 = stack.pop()
-
-                    if type(op1) is bool:
-                        op1_val = op1
-                    else:
-                        op1_val = self._graph.nodes[op1]["value"]
-                        if not op1_val:
-                            self._resolve_query(op1)
-
-                    if type(op2) is bool:
-                        op2_val = op2
-                    else:
-                        op2_val = self._graph.nodes[op2]["value"]
-                        if not op2_val:
-                            self._resolve_query(op2)
-
-                    stack.append(token.eval(op1_val, op2_val))
-                elif token.is_prefix_operator():
-                    op = stack.pop()
-
-                    if type(op) is bool:
-                        op_val = op
-                    else:
-                        op_val = self._graph.nodes[op]["value"]
-                        if not op_val:
-                            self._resolve_query(op)
-
-                    stack.append(token.eval(op_val))
-
-        return stack[0]
+    # def _solve_rpn(self, token_list):
+    #     stack = []
+    #
+    #     for token in token_list:
+    #         if type(token) is Fact:
+    #             stack.append(token)
+    #         elif type(token) is Operator:
+    #             if token.is_infix_operator():
+    #                 op1 = stack.pop()
+    #                 op2 = stack.pop()
+    #
+    #                 if type(op1) is bool:
+    #                     op1_val = op1
+    #                 else:
+    #                     op1_val = self._graph.nodes[op1]["value"]
+    #                     if not op1_val:
+    #                         self._resolve_query(op1)
+    #
+    #                 if type(op2) is bool:
+    #                     op2_val = op2
+    #                 else:
+    #                     op2_val = self._graph.nodes[op2]["value"]
+    #                     if not op2_val:
+    #                         self._resolve_query(op2)
+    #
+    #                 stack.append(token.eval(op1_val, op2_val))
+    #             elif token.is_prefix_operator():
+    #                 op = stack.pop()
+    #
+    #                 if type(op) is bool:
+    #                     op_val = op
+    #                 else:
+    #                     op_val = self._graph.nodes[op]["value"]
+    #                     if not op_val:
+    #                         self._resolve_query(op)
+    #
+    #                 stack.append(token.eval(op_val))
+    #
+    #     return stack[0]
 
     # def _get_fact_tokens(self, rule):
     #     left_side_facts = []
@@ -337,12 +336,12 @@ class Parser:
     #     for query in self._queries:
     #         self._resolve_query(query)
 
-    def _link_rule_node(self, rule_node):
-        for fact in rule_node.get_right_side_facts():
-            self._graph.add_edge(fact, rule_node)
-
-        for fact in rule_node.get_left_side_facts():
-            self._graph.add_edge(rule_node, fact)
+    # def _link_rule_node(self, rule_node):
+    #     for fact in rule_node.get_right_side_facts():
+    #         self._graph.add_edge(fact, rule_node)
+    #
+    #     for fact in rule_node.get_left_side_facts():
+    #         self._graph.add_edge(rule_node, fact)
         # if len(rule_node.right_side) == 1:
         #     val = rule_node.right_side[0]
         #
@@ -388,7 +387,7 @@ class Parser:
 
         left_side, conclusion_op, right_side = self._partition_rule(tokenized_rule)
 
-        rule_node = RuleNode(left_side, conclusion_op, right_side)
+        rule_node = Rule(left_side, conclusion_op, right_side)
 
         self.rules.append(rule_node)
 
