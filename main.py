@@ -4,7 +4,9 @@ import sys
 import logging
 import argparse
 from expert_system.parser.parser import Parser
+from expert_system.parser.parser import ParserException
 from expert_system.inference_engine.inference_engine import InferenceEngine
+from expert_system.inference_engine.inference_engine import InferenceEngineException
 
 
 def check_python_version():
@@ -23,31 +25,38 @@ def argument_parser():
     return arg_parser.parse_args()
 
 
-def configure_verbose_logging(is_verbose):
+def configure_logging():
     logging_format = "%(message)s"
 
-    if is_verbose:
-        logging.basicConfig(level=logging.DEBUG, format=logging_format)
-    else:
-        logging.basicConfig(level=logging.INFO, format=logging_format)
+    logging.basicConfig(level=logging.INFO, format=logging_format)
 
 
 if __name__ == "__main__":
     check_python_version()
     parsed_args = argument_parser()
 
-    configure_verbose_logging(parsed_args.verbose)
+    configure_logging()
 
-    parser = Parser(parsed_args.file)
+    if parsed_args.verbose:
+        logging.info("\33[32m" + "STARTING!" + "\033[0m")
 
-    parser.tokenize_file()
+    try:
+        parser = Parser(parsed_args.file)
 
-    engine = InferenceEngine(verbose=parsed_args.verbose,
-                             graphic=parsed_args.graphic,
-                             interactive=parsed_args.interactive,
-                             queries=parser.queries,
-                             initial_facts=parser.initial_facts,
-                             rules=parser.rules)
+        parser.tokenize_file()
 
-    engine.resolve_queries()
+        engine = InferenceEngine(verbose=parsed_args.verbose,
+                                 graphic=parsed_args.graphic,
+                                 interactive=parsed_args.interactive,
+                                 queries=parser.queries,
+                                 initial_facts=parser.initial_facts,
+                                 rules=parser.rules)
 
+        engine.resolve_queries()
+    except InferenceEngineException as e:
+        logging.error("\033[31m" + "RUNTIME ERROR: {}".format(str(e)) + "\033[0m")
+    except ParserException as e:
+        logging.error("\033[31m" + "PARSER ERROR: {}".format(str(e)) + "\033[0m")
+
+    if parsed_args.verbose:
+        logging.info("\33[32m" + "EXITING..." + "\033[0m")

@@ -1,0 +1,9 @@
+# Hard Not
+
+A => B
+!!!!!!A => B
+
+=
+?B
+# Result should be
+# B:True

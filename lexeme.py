@@ -40,36 +40,34 @@ class Rule:
 
         return right_side_facts
 
-    def solve_right_side(self, res):
-        if len(self.right_side) == 1:
-            val = self.right_side[0]
-
-            if type(val) is Fact:
-                return res
-            else:
-                raise BaseException("Invalid right rule side")
-        elif len(self.right_side) == 2:
-            operator, val = self.right_side
-
-            if type(operator) is Operator and operator.is_prefix_operator() \
-                    and type(val) is Fact:
-                return operator.eval(res)
-            else:
-                raise BaseException("Invalid right rule side")
-        elif len(self.right_side) == 3:
-            v1, operator, v2 = self.right_side
-
-            if type(operator) is Operator and operator.is_infix_operator() \
-                    and type(v1) is Fact and type(v2) is Fact:
-
-                if operator.op == LexemeTypes.OP_AND:
-                    return res
-                else:
-                    raise BaseException("Invalid right rule side")
-            else:
-                raise BaseException("Invalid right rule side")
-        else:
-            raise BaseException("Invalid right rule side")
+    # def solve_right_side(self, res):
+        # if len(self.right_side) == 1:
+        #     val = self.right_side[0]
+        #
+        #     if type(val) is Fact:
+        #         return res
+        #     else:
+        #         raise BaseException("Invalid right rule side")
+        # elif len(self.right_side) == 2:
+        #     operator, val = self.right_side
+        #
+        #     if type(operator) is PrefixOperator and type(val) is Fact:
+        #         return operator.eval(res)
+        #     else:
+        #         raise BaseException("Invalid right rule side")
+        # elif len(self.right_side) == 3:
+        #     v1, operator, v2 = self.right_side
+        #
+        #     if type(operator) is InfixOperator and type(v1) is Fact and type(v2) is Fact:
+        #
+        #         if operator.op == LexemeTypes.OP_AND:
+        #             return res
+        #         else:
+        #             raise BaseException("Invalid right rule side")
+        #     else:
+        #         raise BaseException("Invalid right rule side")
+        # else:
+        #     raise BaseException("Invalid right rule side")
 
     # def _convert_to_rpn(self, token_list):
     #     output = []
@@ -247,25 +245,25 @@ class Fact:
 
 class Operator:
     # Order values in increasing priority
-    infix_operators_list = [
-        LexemeTypes.OP_XOR,
-        LexemeTypes.OP_OR,
-        LexemeTypes.OP_AND,
-    ]
-
-    prefix_operators_list = [
-        LexemeTypes.OP_NOT,
-    ]
-
-    conclusion_operators_list = [
-        LexemeTypes.OP_IMPLIES,
-        LexemeTypes.OP_BICONDITION
-    ]
-
-    other_operators_list = [
-        LexemeTypes.LEFT_BRACKET,
-        LexemeTypes.RIGHT_BRACKET,
-    ]
+    # infix_operators_list = [
+    #     LexemeTypes.OP_XOR,
+    #     LexemeTypes.OP_OR,
+    #     LexemeTypes.OP_AND,
+    # ]
+    #
+    # prefix_operators_list = [
+    #     LexemeTypes.OP_NOT,
+    # ]
+    #
+    # conclusion_operators_list = [
+    #     LexemeTypes.OP_IMPLIES,
+    #     LexemeTypes.OP_BICONDITION
+    # ]
+    #
+    # other_operators_list = [
+    #     LexemeTypes.LEFT_BRACKET,
+    #     LexemeTypes.RIGHT_BRACKET,
+    # ]
 
     def __init__(self, op):
         self.op = op
@@ -276,63 +274,139 @@ class Operator:
     def __repr__(self):
         return self.op
 
-    def is_infix_operator(self):
-        return self.op in Operator.infix_operators_list
+    # def is_infix_operator(self):
+    #     return self.op in Operator.infix_operators_list
+    #
+    # def is_prefix_operator(self):
+    #     return self.op in Operator.prefix_operators_list
+    #
+    # def is_conclusion_operator(self):
+    #     return self.op in Operator.conclusion_operators_list
+    #
+    # def eval(self, left, right=None):
+    #     if self.op == LexemeTypes.OP_XOR:
+    #         return left ^ right
+    #     elif self.op == LexemeTypes.OP_OR:
+    #         return left | right
+    #     elif self.op == LexemeTypes.OP_AND:
+    #         return left & right
+    #     elif self.op == LexemeTypes.OP_NOT:
+    #         return not left
+    #
+    # @staticmethod
+    # def operators_list():
+    #     return [
+    #         *Operator.infix_operators_list,
+    #         *Operator.prefix_operators_list,
+    #         *Operator.conclusion_operators_list,
+    #         *Operator.other_operators_list
+    #     ]
 
-    def is_prefix_operator(self):
-        return self.op in Operator.prefix_operators_list
 
-    def is_conclusion_operator(self):
-        return self.op in Operator.conclusion_operators_list
+class InfixOperator(Operator):
+    # Order values in increasing priority
+    infix_operators_list = [
+        LexemeTypes.OP_XOR,
+        LexemeTypes.OP_OR,
+        LexemeTypes.OP_AND,
+    ]
 
-    def eval(self, left, right=None):
+    def __init__(self, op):
+        if op not in InfixOperator.infix_operators_list:
+            raise BaseException("Invalid infix operator")
+        super().__init__(op)
+
+    def __str__(self):
+        return super().__repr__()
+
+    def __repr__(self):
+        return super().__repr__()
+
+    def eval(self, val1, val2):
         if self.op == LexemeTypes.OP_XOR:
-            return left ^ right
+            return val1 ^ val2
         elif self.op == LexemeTypes.OP_OR:
-            return left | right
+            return val1 | val2
         elif self.op == LexemeTypes.OP_AND:
-            return left & right
-        elif self.op == LexemeTypes.OP_NOT:
-            return not left
+            return val1 & val2
+
+
+class PrefixOperator(Operator):
+    # Order values in increasing priority
+    prefix_operators_list = [
+        LexemeTypes.OP_NOT
+    ]
+
+    def __init__(self, op):
+        if op not in PrefixOperator.prefix_operators_list:
+            raise BaseException("Invalid prefix operator")
+        super().__init__(op)
+
+    def __str__(self):
+        return super().__repr__()
+
+    def __repr__(self):
+        return super().__repr__()
+
+    def eval(self, val):
+        if self.op == LexemeTypes.OP_NOT:
+            return not val
+
+
+class ConclusionOperator(Operator):
+    conclusion_operators_list = [
+        LexemeTypes.OP_IMPLIES,
+        LexemeTypes.OP_BICONDITION
+    ]
+
+    def __init__(self, op):
+        if op not in ConclusionOperator.conclusion_operators_list:
+            raise BaseException("Invalid conclusion operator")
+        super().__init__(op)
+
+    def __str__(self):
+        return super().__repr__()
+
+    def __repr__(self):
+        return super().__repr__()
+
+
+class BracketOperator(Operator):
+    bracket_operators_list = [
+        LexemeTypes.LEFT_BRACKET,
+        LexemeTypes.RIGHT_BRACKET,
+    ]
+
+    def __init__(self, op):
+        if op not in BracketOperator.bracket_operators_list:
+            raise BaseException("Invalid bracket operator")
+        super().__init__(op)
+
+    def __str__(self):
+        return super().__repr__()
+
+    def __repr__(self):
+        return super().__repr__()
+
+
+class OperatorFactory:
+    operators_list = [
+        *BracketOperator.bracket_operators_list,
+        *ConclusionOperator.conclusion_operators_list,
+        *PrefixOperator.prefix_operators_list,
+        *InfixOperator.infix_operators_list
+    ]
 
     @staticmethod
-    def operators_list():
-        return [
-            *Operator.infix_operators_list,
-            *Operator.prefix_operators_list,
-            *Operator.conclusion_operators_list,
-            *Operator.other_operators_list
-        ]
+    def get_operator(operator):
+        if operator in BracketOperator.bracket_operators_list:
+            return BracketOperator(operator)
+        elif operator in ConclusionOperator.conclusion_operators_list:
+            return ConclusionOperator(operator)
+        elif operator in PrefixOperator.prefix_operators_list:
+            return PrefixOperator(operator)
+        elif operator in InfixOperator.infix_operators_list:
+            return InfixOperator(operator)
+        else:
+            raise ValueError("Invalid operator - {}".format(operator))
 
-
-# LEXEME_SYMBOLS = [
-#     LexemeTypes.LEFT_BRACKET,
-#     LexemeTypes.RIGHT_BRACKET,
-#     LexemeTypes.OP_NOT,
-#     LexemeTypes.OP_AND,
-#     LexemeTypes.OP_OR,
-#     LexemeTypes.OP_XOR,
-#     LexemeTypes.OP_IMPLIES,
-#     LexemeTypes.OP_BICONDITION
-# ]
-#
-# LEXEME_PREFIX_OPERANDS = [
-#     LexemeTypes.OP_NOT
-# ]
-#
-# # Order values in increasing priority
-# LEXEME_INFIX_OPERANDS = [
-#     LexemeTypes.OP_XOR,
-#     LexemeTypes.OP_OR,
-#     LexemeTypes.OP_AND,
-# ]
-#
-# LEXEME_OPERANDS = {
-#     *LEXEME_PREFIX_OPERANDS,
-#     *LEXEME_INFIX_OPERANDS
-# }
-#
-# LEXEME_IMPLICATION_TYPES = [
-#     LexemeTypes.OP_IMPLIES,
-#     LexemeTypes.OP_BICONDITION
-# ]

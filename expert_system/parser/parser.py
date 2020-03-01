@@ -13,10 +13,6 @@ class Parser:
         self.queries = []
         self.rules = []
 
-        # self._graph = nx.MultiDiGraph()
-
-        # self._initialize_nodes()
-
     def tokenize_file(self):
         try:
             with open(self._filename, "r") as file:
@@ -40,71 +36,6 @@ class Parser:
             self._check_for_input_values_definition()
         except IOError as e:
             raise ParserException(str(e))
-        # self._resolve_queries()
-
-        # for i in self._graph.nodes:
-        #     if type(i) is Fact:
-        #         print("i = {}; i1 = {}".format(self._graph.nodes[i], i))
-
-        # print(self._graph[Fact("A")])
-
-        # nx.draw(self._graph,
-        #         with_labels=True,
-        #         arrows=True,
-        #         pos=nx.circular_layout(self._graph),
-        #         node_color=self._colorized_nodes())
-
-        # nx.drawing.nx_pydot.write_dot(self._graph, "test.png")
-
-        # edge_labels = nx.get_edge_attributes(self._graph, 'rule')
-        #
-        # for a,b,c in edge_labels:
-        #     print(a, b, c)
-
-        # edge_labels = self._graph.edges.data(True)
-
-        # print(edge_labels)
-
-        # edge_labels = dict([((u, v,), d['rule'])
-        #                     for u, v, d in self._graph.edges(data=True)])
-        #
-        # nx.draw_networkx_edge_labels(self._graph,
-        #                              nx.circular_layout(self._graph),
-        #                              edge_labels=edge_labels,
-        #                              rotate=True,
-        #                              font_size=6)
-
-        # nx.draw_networkx_edges(self._graph,
-        #                        with_labels=True,
-        #                        arrows=True,
-        #                        pos=nx.circular_layout(self._graph),
-        #                        node_size=100)
-        # plt.show()
-        # print(self._queries)
-        # print(self._initial_facts)
-
-    # def _initialize_nodes(self):
-    #     for fact_val in LexemeTypes.FACT:
-    #         self._graph.add_node(Fact(fact_val), value=False)
-    # def _colorized_nodes(self):
-    #     ret = []
-    #
-    #     for node in self._graph.nodes():
-    #         if type(node) is Fact:
-    #             if node in self._queries:
-    #                 if self._graph.nodes[node]["value"]:
-    #                     ret.append("red")
-    #                 else:
-    #                     ret.append("blue")
-    #             else:
-    #                 if self._graph.nodes[node]["value"]:
-    #                     ret.append("yellow")
-    #                 else:
-    #                     ret.append("gray")
-    #         else:
-    #             ret.append("purple")
-    #
-    #     return ret
 
     def _check_for_initial_facts(self, facts):
         if self._parsed_initial_facts:
@@ -112,10 +43,7 @@ class Parser:
 
         for fact in facts[1:]:
             if fact in LexemeTypes.FACT:
-                # self._graph.nodes[Fact(fact)]["value"] = True
                 self.initial_facts.append(Fact(fact))
-                # self._safely_add_node(Fact(fact), value=True)
-                # self._initial_facts.append(Lexeme(LexemeTypes.FACT, fact))
             else:
                 raise ParserException("Invalid fact in initial facts")
 
@@ -130,8 +58,6 @@ class Parser:
 
         for query in queries[1:]:
             if query in LexemeTypes.FACT:
-                # self._queries.append(Fact(query))
-                # self._safely_add_node(Fact(query))
                 self.queries.append(Fact(query))
             else:
                 raise ParserException("Invalid fact in queries")
@@ -161,9 +87,9 @@ class Parser:
                 cut_line = line[i:]
                 operand_found = False
 
-                for op in Operator.operators_list():
+                for op in OperatorFactory.operators_list:
                     if cut_line.startswith(op):
-                        token_list.append(Operator(op))
+                        token_list.append(OperatorFactory.get_operator(op))
                         chars_to_skip = len(op) - 1
                         operand_found = True
 
@@ -178,7 +104,7 @@ class Parser:
         conclusion_op = None
 
         for token in rule:
-            if type(token) is Operator and token.is_conclusion_operator():
+            if type(token) is ConclusionOperator:
                 if not conclusion_op:
                     conclusion_op = token
                 else:

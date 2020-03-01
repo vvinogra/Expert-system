@@ -1,0 +1,10 @@
+# Basic XOR
+
+B + C => A
+D ^ E => B
+B     => C
+
+=D
+?A
+# Result should be
+# A:True
