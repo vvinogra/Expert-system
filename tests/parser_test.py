@@ -8,7 +8,7 @@ from expert_system.parser.parser_exception import ParserException
 
 
 def test_bad_files():
-    run_tests(get_test_files("./tests/examples/bad_files"))
+    run_tests(get_test_files("./tests/examples/error"))
 
 
 def get_test_files(path):
@@ -16,7 +16,7 @@ def get_test_files(path):
 
     for dirpath, dirnames, filenames in os.walk(path):
         for filename in filenames:
-            matches.append(filename)
+            matches.append(os.path.join(dirpath, filename))
     return matches
 
 
@@ -25,4 +25,7 @@ def run_tests(tests):
         with pytest.raises(ParserException):
             print("Testing file: {filename}".format(filename=test))
             parser = Parser(test)
+            parser.tokenize_file()
+            # print(parser.initial_facts)
 
+    # assert False

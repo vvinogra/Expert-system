@@ -71,6 +71,79 @@ class Rule:
         else:
             raise BaseException("Invalid right rule side")
 
+    # def _convert_to_rpn(self, token_list):
+    #     output = []
+    #     stack = []
+    #     expect_operand = True
+    #
+    #     for token in token_list:
+    #         if type(token) is Fact:
+    #             if not expect_operand:
+    #                 raise InferenceEngineException("Invalid expression")
+    #
+    #             expect_operand = False
+    #
+    #             output.append(token)
+    #         elif type(token) is Operator:
+    #             if token.is_prefix_operator():
+    #                 if not expect_operand:
+    #                     raise InferenceEngineException("Invalid expression")
+    #
+    #                 expect_operand = True
+    #
+    #                 stack.append(token)
+    #             elif token.op == LexemeTypes.LEFT_BRACKET:
+    #                 if not expect_operand:
+    #                     raise InferenceEngineException("Invalid expression")
+    #
+    #                 expect_operand = True
+    #
+    #                 stack.append(token)
+    #             elif token.op == LexemeTypes.RIGHT_BRACKET:
+    #                 if expect_operand:
+    #                     raise InferenceEngineException("Invalid expression")
+    #
+    #                 expect_operand = False
+    #
+    #                 while stack:
+    #                     last_token = stack.pop()
+    #
+    #                     if last_token.op == LexemeTypes.LEFT_BRACKET:
+    #                         break
+    #
+    #                     output.append(last_token)
+    #
+    #                 if not stack:
+    #                     raise InferenceEngineException("Invalid brackets count in expression")
+    #
+    #             elif token.is_infix_operator():
+    #                 if expect_operand:
+    #                     raise InferenceEngineException("Invalid expression")
+    #
+    #                 expect_operand = True
+    #
+    #                 while stack:
+    #                     last_stack_token = stack[-1]
+    #
+    #                     # Fix error with brackets
+    #                     if last_stack_token.is_prefix_operator() or \
+    #                             Operator.infix_operators_list.index(last_stack_token.op) >= \
+    #                             Operator.infix_operators_list.index(token.op):
+    #                         output.append(stack.pop())
+    #                     else:
+    #                         break
+    #
+    #                 stack.append(token)
+    #
+    #     for op in stack:
+    #         if op.is_prefix_operator() or \
+    #                 op.is_infix_operator():
+    #             output.append(op)
+    #         else:
+    #             raise InferenceEngineException("Invalid brackets count in expression")
+    #
+    #     return output
+
 
 class LexemeTypes:
     FACT = tuple(string.ascii_uppercase)

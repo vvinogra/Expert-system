@@ -18,26 +18,28 @@ class Parser:
         # self._initialize_nodes()
 
     def tokenize_file(self):
-        with open(self._filename, "r") as file:
-            for line in file:
-                # Removing comment
-                line = line.partition("#")[0]
+        try:
+            with open(self._filename, "r") as file:
+                for line in file:
+                    # Removing comment
+                    line = line.partition("#")[0]
 
-                # Removing trailing whitespaces
-                line = line.strip()
+                    # Removing trailing whitespaces
+                    line = line.strip()
 
-                if not len(line):
-                    continue
+                    if not len(line):
+                        continue
 
-                if line[0].startswith("="):
-                    self._check_for_initial_facts(line)
-                elif line[0].startswith("?"):
-                    self._check_for_queries(line)
-                else:
-                    self._parse_rule(line)
+                    if line[0].startswith("="):
+                        self._check_for_initial_facts(line)
+                    elif line[0].startswith("?"):
+                        self._check_for_queries(line)
+                    else:
+                        self._parse_rule(line)
 
-                # pass
-
+            self._check_for_input_values_definition()
+        except IOError as e:
+            raise ParserException(str(e))
         # self._resolve_queries()
 
         # for i in self._graph.nodes:
@@ -135,6 +137,13 @@ class Parser:
                 raise ParserException("Invalid fact in queries")
 
         self._parsed_queries = True
+
+    def _check_for_input_values_definition(self):
+        if not self._parsed_queries:
+            raise ParserException("Queries are not defined")
+
+        if not self._parsed_initial_facts:
+            raise ParserException("Initial facts are not defined")
 
     def _tokenize_rule(self, line):
         token_list = []

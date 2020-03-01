@@ -120,6 +120,7 @@ class InferenceEngine:
                     while stack:
                         last_stack_token = stack[-1]
 
+                        # Fix error with brackets
                         if last_stack_token.is_prefix_operator() or \
                                 Operator.infix_operators_list.index(last_stack_token.op) >= \
                                 Operator.infix_operators_list.index(token.op):
@@ -182,19 +183,18 @@ class InferenceEngine:
     def _resolve_query(self, query):
         result = []
 
-        if query in self._graph.nodes():
-            for neighbor in self._graph.neighbors(query):
-                rpn_left_side = self._convert_to_rpn(neighbor.left_side)
+        for neighbor in self._graph.neighbors(query):
+            rpn_left_side = self._convert_to_rpn(neighbor.left_side)
 
-                res_left = self._solve_rpn(rpn_left_side)
+            res_left = self._solve_rpn(rpn_left_side)
 
-                res = neighbor.solve_right_side(res_left)
+            res = neighbor.solve_right_side(res_left)
 
-                result.append(res)
+            result.append(res)
 
         if len(result):
             if not all(x == result[0] for x in result):
-                raise BaseException("Contradiction in facts")
+                raise InferenceEngineException("Contradiction in facts")
             self._graph.nodes[query]["value"] = result[0]
         else:
             self._graph.nodes[query]["value"] = False
