@@ -41,8 +41,8 @@ class InferenceEngine:
                                      OperatorFactory.get_operator(LexemeTypes.OP_IMPLIES), rule.left_side)
 
                 self._log_verbose("SPLITTING BICONDITION RULE")
-                self._log_verbose("FIRST NEW RULE = {}".format(new_rule))
-                self._log_verbose("SECOND NEW RULE = {}".format(new_swap_rule))
+                self._log_verbose("FIRST NEW RULE = \"{}\"".format(new_rule))
+                self._log_verbose("SECOND NEW RULE = \"{}\"".format(new_swap_rule))
 
                 for r_fact in new_rule.get_right_side_facts():
                     self._graph.add_edge(r_fact, new_rule)
@@ -128,15 +128,18 @@ class InferenceEngine:
 
                 expect_operand = False
 
+                found_bracket = False
+
                 while stack:
                     last_token = stack.pop()
 
                     if last_token.op == LexemeTypes.LEFT_BRACKET:
+                        found_bracket = True
                         break
 
                     output.append(last_token)
 
-                if not stack:
+                if not found_bracket:
                     raise InferenceEngineException("Invalid brackets count in expression")
 
             elif type(token) is InfixOperator:
@@ -169,14 +172,16 @@ class InferenceEngine:
 
         return output
 
-    def _solve_rpn(self, token_list):
+    def _solve_rpn(self, token_list, dependent_side):
         stack = []
 
         for token in token_list:
             if type(token) is Fact:
+                # hard_or and hard_biconditional tests are not passing
                 self._log_verbose("RESOLVING FACT DEPENDENCY: {}".format(token))
                 # if token not in self._initial_facts:
-                self._resolve_query(token)
+                if dependent_side:
+                    self._resolve_query(token, dependent_side)
 
                 stack.append(token)
             elif type(token) is InfixOperator:
@@ -237,7 +242,7 @@ class InferenceEngine:
         else:
             raise InferenceEngineException("Invalid right rule side")
 
-    def _resolve_query(self, query):
+    def _resolve_query(self, query, dependent_side=None):
         result = []
 
         if query in self._initial_facts:
@@ -247,14 +252,14 @@ class InferenceEngine:
         self._log_verbose("CHECKING FACT(\"{}\") RULES".format(query))
 
         for neighbor in self._graph.neighbors(query):
-            # if dependent_side and neighbor.left_side == dependent_side:
-            #     continue
+            if dependent_side and neighbor.left_side == dependent_side:
+                continue
             self._log_verbose("SOLVING RULE: {}".format(neighbor))
 
             rpn_left_side = self._convert_to_rpn(neighbor.left_side)
             self._log_verbose("RPN: {}".format(rpn_left_side))
 
-            res_left = self._solve_rpn(rpn_left_side)
+            res_left = self._solve_rpn(rpn_left_side, neighbor.right_side)
 
             self._log_verbose("RULE EXPRESSION EQUALS: {}".format(res_left))
 

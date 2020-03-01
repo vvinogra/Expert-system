@@ -6,4 +6,4 @@ A => B
 =
 ?B
 # Result should be
-# B:True
+# B:False

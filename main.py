@@ -38,7 +38,7 @@ if __name__ == "__main__":
     configure_logging()
 
     if parsed_args.verbose:
-        logging.info("\33[32m" + "STARTING!" + "\033[0m")
+        logging.info("\33[32m" + "STARTING!" + "\033[0m")  # Green colored
 
     try:
         parser = Parser(parsed_args.file)
@@ -54,9 +54,9 @@ if __name__ == "__main__":
 
         engine.resolve_queries()
     except InferenceEngineException as e:
-        logging.error("\033[31m" + "RUNTIME ERROR: {}".format(str(e)) + "\033[0m")
+        logging.error("\033[31m" + "RUNTIME ERROR: {}".format(str(e)) + "\033[0m")  # Red colored
     except ParserException as e:
-        logging.error("\033[31m" + "PARSER ERROR: {}".format(str(e)) + "\033[0m")
+        logging.error("\033[31m" + "PARSER ERROR: {}".format(str(e)) + "\033[0m")  # Red colored
 
     if parsed_args.verbose:
-        logging.info("\33[32m" + "EXITING..." + "\033[0m")
+        logging.info("\33[32m" + "EXITING..." + "\033[0m")  # Green colored

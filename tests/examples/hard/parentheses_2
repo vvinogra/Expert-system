@@ -1,0 +1,9 @@
+# Parentheses
+
+ A | B  + C => E
+(F | G) + H => E
+
+=A
+?E
+# Result should be
+# RUNTIME ERROR: Contradiction in facts

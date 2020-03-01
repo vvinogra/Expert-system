@@ -1,0 +1,9 @@
+# Multiple same conclusion rule
+
+B => A
+C => A
+
+=B
+?A
+# Result should be
+# RUNTIME ERROR: Contradiction in facts
