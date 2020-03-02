@@ -48,13 +48,24 @@ class InferenceEngineShell(Cmd):
         else:
             logging.info(self.parser.initial_facts)
 
-    def do_queries(self, arg):
-        """Print queries: queries"""
+    def do_queries(self, new_queries):
+        """Print or set queries: queries [new queries]"""
         if not self.parser:
             logging.warning("Parsed file is not valid")
             return
 
-        logging.info(self.parser.queries)
+        if new_queries:
+            backup_queries = self.parser.queries
+
+            self.parser.queries = []
+
+            try:
+                self.parser.parse_queries(new_queries)
+            except ParserException as e:
+                self.parser.queries = backup_queries
+                logging.error("\033[31m" + "PARSER ERROR: {}".format(str(e)) + "\033[0m")  # Red colored
+        else:
+            logging.info(self.parser.queries)
 
     def do_verbose(self, status):
         """Print or set verbose mode: verbose [True/False]"""
@@ -73,6 +84,10 @@ class InferenceEngineShell(Cmd):
 
     def do_exec(self, arg):
         """Resolve undefined queries: exec"""
+        if arg:
+            logging.warning("\"exec\" command doesn't accept any arguments")
+            return
+
         if not self.parser:
             logging.warning("Parsed file is not valid")
             return

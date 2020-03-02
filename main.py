@@ -39,6 +39,10 @@ if __name__ == "__main__":
     configure_logging()
 
     if parsed_args.interactive:
+        if parsed_args.graphic:
+            logging.error("Can't run graphic and interactive modes together")
+            sys.exit(0)
+
         shell = InferenceEngineShell()
 
         shell.do_verbose(parsed_args.verbose)
