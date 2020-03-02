@@ -94,12 +94,13 @@ class InferenceEngineShell(Cmd):
 
         try:
             engine = InferenceEngine(verbose=self.verbose_mode,
-                                     graphic=False,
                                      queries=self.parser.queries,
                                      initial_facts=self.parser.initial_facts,
                                      rules=self.parser.rules)
 
             engine.resolve_queries()
+
+            engine.print_queries()
         except InferenceEngineException as e:
             logging.error("\033[31m" + "RUNTIME ERROR: {}".format(str(e)) + "\033[0m")  # Red colored
 

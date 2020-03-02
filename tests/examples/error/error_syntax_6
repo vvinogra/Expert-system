@@ -1,8 +1,9 @@
-# Error syntax 6
+# Error Syntax 7
 
-( A + B => C
+A + B > C
 
-=AB
-?C
+?A
+=C
+
 # Result should be
 # Error

@@ -11,8 +11,7 @@ from expert_system.common.rule import Rule
 
 
 class InferenceEngine:
-    def __init__(self, graphic, verbose, queries, initial_facts, rules):
-        self.graphic = graphic
+    def __init__(self, verbose, queries, initial_facts, rules):
         self.verbose = verbose
 
         self._graph = nx.MultiDiGraph()
@@ -69,7 +68,7 @@ class InferenceEngine:
         if self.verbose:
             logging.info(msg, *args, **kwargs)
 
-    def _show_graph_plot(self):
+    def show_graph_plot(self):
         nx.draw(self._graph,
                 with_labels=True,
                 arrows=True,
@@ -182,8 +181,6 @@ class InferenceEngine:
             if type(token) is Fact:
                 # hard_or and hard_biconditional tests are not passing
                 self._log_verbose("RESOLVING FACT DEPENDENCY: {}".format(token))
-                # if token not in self._initial_facts:
-                # if recursion_count:
                 self._resolve_query(token, recursion_count)
 
                 stack.append(token)
@@ -260,8 +257,6 @@ class InferenceEngine:
         self._log_verbose("CHECKING FACT(\"{}\") RULES".format(query))
 
         for neighbor in self._graph.neighbors(query):
-            # if dependent_side and neighbor.left_side == dependent_side:
-            #     continue
             self._log_verbose("SOLVING RULE: {}".format(neighbor))
 
             rpn_left_side = self._convert_to_rpn(neighbor.left_side)
@@ -296,8 +291,3 @@ class InferenceEngine:
         for query in self._queries:
             self._log_verbose("RESOLVING QUERY: {}".format(query))
             self._resolve_query(query, 0)
-
-        self.print_queries()
-
-        if self.graphic:
-            self._show_graph_plot()

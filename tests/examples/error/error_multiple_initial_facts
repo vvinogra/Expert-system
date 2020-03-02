@@ -1,0 +1,7 @@
+# Error multiple initial facts
+
+A => B
+
+=A
+=AB
+?B

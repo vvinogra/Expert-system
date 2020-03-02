@@ -1,0 +1,7 @@
+# Error multiple queries
+
+A => B
+
+=A
+?B
+?AB

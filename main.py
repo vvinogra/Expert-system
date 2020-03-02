@@ -58,12 +58,16 @@ if __name__ == "__main__":
             parser.tokenize_file()
 
             engine = InferenceEngine(verbose=parsed_args.verbose,
-                                     graphic=parsed_args.graphic,
                                      queries=parser.queries,
                                      initial_facts=parser.initial_facts,
                                      rules=parser.rules)
 
             engine.resolve_queries()
+
+            engine.print_queries()
+
+            if parsed_args.graphic:
+                engine.show_graph_plot()
         except InferenceEngineException as e:
             logging.error("\033[31m" + "RUNTIME ERROR: {}".format(str(e)) + "\033[0m")  # Red colored
         except ParserException as e:
