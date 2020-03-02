@@ -11,8 +11,8 @@ class Parser:
     def __init__(self, filename):
         self._filename = filename
 
-        self._parsed_initial_facts = False
-        self._parsed_queries = False
+        self.parsed_initial_facts = False
+        self.parsed_queries = False
         self.initial_facts = []
         self.queries = []
         self.rules = []
@@ -31,48 +31,48 @@ class Parser:
                         continue
 
                     if line[0].startswith("="):
-                        self._check_for_initial_facts(line)
+                        if self.parsed_initial_facts:
+                            raise ParserException("Initial facts line occurred twice")
+
+                        self.parse_initial_facts(line[1:])
+
+                        self.parsed_initial_facts = True
                     elif line[0].startswith("?"):
-                        self._check_for_queries(line)
+                        if self.parsed_queries:
+                            raise ParserException("Line with queries occurred twice")
+
+                        self.parse_queries(line[1:])
+
+                        self.parsed_queries = True
                     else:
                         self._parse_rule(line)
 
-            self._check_for_input_values_definition()
+                self._check_for_input_values_definition()
         except IOError as e:
             raise ParserException(str(e))
 
-    def _check_for_initial_facts(self, facts):
-        if self._parsed_initial_facts:
-            raise ParserException("Initial facts line occurred twice")
-
-        for fact in facts[1:]:
+    def parse_initial_facts(self, facts):
+        for fact in facts:
             if fact in LexemeTypes.FACT:
                 self.initial_facts.append(Fact(fact))
             else:
                 raise ParserException("Invalid fact in initial facts")
 
-        self._parsed_initial_facts = True
-
-    def _check_for_queries(self, queries):
-        if self._parsed_queries:
-            raise ParserException("Line with queries occurred twice")
-
-        if len(queries) == 1:
+    def parse_queries(self, queries):
+        if not len(queries):
             raise ParserException("No queries are specified")
 
-        for query in queries[1:]:
+        for query in queries:
             if query in LexemeTypes.FACT:
                 self.queries.append(Fact(query))
             else:
                 raise ParserException("Invalid fact in queries")
 
-        self._parsed_queries = True
-
     def _check_for_input_values_definition(self):
-        if not self._parsed_queries:
+        if not self.parsed_queries:
             raise ParserException("Queries are not defined")
 
-        if not self._parsed_initial_facts:
+        if not self.parsed_initial_facts:
             raise ParserException("Initial facts are not defined")
 
     def _tokenize_rule(self, line):

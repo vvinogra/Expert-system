@@ -6,15 +6,13 @@ from .inference_engine_exception import InferenceEngineException
 
 from expert_system.common.lexeme_types import LexemeTypes
 from expert_system.common.fact import Fact
-
 from expert_system.common.operator import OperatorFactory, PrefixOperator, InfixOperator
 from expert_system.common.rule import Rule
 
 
 class InferenceEngine:
-    def __init__(self, graphic, interactive, verbose, queries, initial_facts, rules):
+    def __init__(self, graphic, verbose, queries, initial_facts, rules):
         self.graphic = graphic
-        self.interactive = interactive
         self.verbose = verbose
 
         self._graph = nx.MultiDiGraph()
@@ -298,7 +296,6 @@ class InferenceEngine:
         for query in self._queries:
             self._log_verbose("RESOLVING QUERY: {}".format(query))
             self._resolve_query(query, 0)
-            # logging.info("{query} = {value}".format(query=query, value=self._graph.nodes[query]["value"]))
 
         self.print_queries()
 
