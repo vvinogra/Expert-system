@@ -2,8 +2,13 @@ import logging
 import networkx as nx
 import matplotlib.pyplot as plt
 
-from lexeme import *
 from .inference_engine_exception import InferenceEngineException
+
+from expert_system.common.lexeme_types import LexemeTypes
+from expert_system.common.fact import Fact
+
+from expert_system.common.operator import OperatorFactory, PrefixOperator, InfixOperator
+from expert_system.common.rule import Rule
 
 
 class InferenceEngine:
@@ -172,7 +177,7 @@ class InferenceEngine:
 
         return output
 
-    def _solve_rpn(self, token_list, dependent_side):
+    def _solve_rpn(self, token_list, recursion_count):
         stack = []
 
         for token in token_list:
@@ -180,8 +185,8 @@ class InferenceEngine:
                 # hard_or and hard_biconditional tests are not passing
                 self._log_verbose("RESOLVING FACT DEPENDENCY: {}".format(token))
                 # if token not in self._initial_facts:
-                if dependent_side:
-                    self._resolve_query(token, dependent_side)
+                # if recursion_count:
+                self._resolve_query(token, recursion_count)
 
                 stack.append(token)
             elif type(token) is InfixOperator:
@@ -242,24 +247,29 @@ class InferenceEngine:
         else:
             raise InferenceEngineException("Invalid right rule side")
 
-    def _resolve_query(self, query, dependent_side=None):
+    def _resolve_query(self, query, recursion_count):
         result = []
 
+        if recursion_count >= 10:
+            return
+
+        recursion_count += 1
+
         if query in self._initial_facts:
-            result.append(self._graph.nodes[query]["value"])
             self._log_verbose("FACT \"{}\" WAS FOUND IN INITIAL FACTS".format(query))
+            return
 
         self._log_verbose("CHECKING FACT(\"{}\") RULES".format(query))
 
         for neighbor in self._graph.neighbors(query):
-            if dependent_side and neighbor.left_side == dependent_side:
-                continue
+            # if dependent_side and neighbor.left_side == dependent_side:
+            #     continue
             self._log_verbose("SOLVING RULE: {}".format(neighbor))
 
             rpn_left_side = self._convert_to_rpn(neighbor.left_side)
             self._log_verbose("RPN: {}".format(rpn_left_side))
 
-            res_left = self._solve_rpn(rpn_left_side, neighbor.right_side)
+            res_left = self._solve_rpn(rpn_left_side, recursion_count)
 
             self._log_verbose("RULE EXPRESSION EQUALS: {}".format(res_left))
 
@@ -287,7 +297,7 @@ class InferenceEngine:
     def resolve_queries(self):
         for query in self._queries:
             self._log_verbose("RESOLVING QUERY: {}".format(query))
-            self._resolve_query(query)
+            self._resolve_query(query, 0)
             # logging.info("{query} = {value}".format(query=query, value=self._graph.nodes[query]["value"]))
 
         self.print_queries()
