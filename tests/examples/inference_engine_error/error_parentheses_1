@@ -3,7 +3,7 @@
  A | B  + C => E
 (F | G) + H => E
 
-=BCFH
+=A
 ?E
 # Result should be
-# E:True
+# RUNTIME ERROR: Contradiction in facts

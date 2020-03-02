@@ -3,7 +3,7 @@
  A | B  + C => E
 (F | G) + H => E
 
-=F
+=BCFH
 ?E
 # Result should be
-# E:False
+# E:True

@@ -3,7 +3,7 @@
  A | B  + C => E
 (F | G) + H => E
 
-=A
+=B
 ?E
 # Result should be
-# RUNTIME ERROR: Contradiction in facts
+# E:False

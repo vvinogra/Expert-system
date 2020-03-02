@@ -3,7 +3,7 @@
 B => A
 C => A
 
-=B
+=BC
 ?A
 # Result should be
-# RUNTIME ERROR: Contradiction in facts
+# A:True
